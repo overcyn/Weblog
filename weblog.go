@@ -44,9 +44,15 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		// Create a new record.
 		key := datastore.NewIncompleteKey(ctx, "Log", nil)
+		t, err := time.Parse(time.RFC3339, r.FormValue("date"))
+		if err != nil {
+			log.Errorf(ctx, "time.Parse: %v", err)
+			t = time.Now()
+		}
+
 		l := Log{
 			Message: r.FormValue("message"),
-			Date:    time.Now(),
+			Date:    t,
 		}
 		if _, err := datastore.Put(ctx, key, &l); err != nil {
 			log.Errorf(ctx, "datastore.Put: %v", err)
@@ -54,8 +60,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		// Remove the record.
-		// Serve the resource.
-		q := datastore.NewQuery("Log").Limit(1000).KeysOnly()
+		q := datastore.NewQuery("Log").KeysOnly()
 		keys, err := q.GetAll(ctx, nil)
 		if err != nil {
 			log.Errorf(ctx, "datastore.GetAll: %v", err)

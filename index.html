@@ -9,18 +9,18 @@
 
 <table style="width:100%">
   <tr>
-    <th align="left">Date</th>
+    <th align="left" width="200px">Date</th>
     <th align="left">Message</th> 
   </tr>
   {{range .Logs}}
   <tr>
-    <td width="200px">{{.Date.Format "2006 Jan 02 15:04:05"}}</td>
+    <td>{{.Date.Format "2006 Jan 02 15:04:05"}}</td>
     <td>{{.Message}}</td>
   </tr>
   {{end}}
   {{if not .Logs}}
   <tr>
-    <td width="200px">-</td>
+    <td>-</td>
     <td>-</td>
   </tr>
   {{end}}
