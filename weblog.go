@@ -10,6 +10,7 @@ import (
 	"google.golang.org/appengine/log"
 	"html/template"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		// Serve the resource.
 		var logs []Log
-		q := datastore.NewQuery("Log").Order("-Date").Limit(1000)
+		q := datastore.NewQuery("Log").Order("-Date").Limit(10000)
 		if _, err := q.GetAll(ctx, &logs); err != nil {
 			log.Errorf(ctx, "datastore.GetAll: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -53,6 +54,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		l := Log{
 			Message: r.FormValue("message"),
 			Date:    t,
+			Tags:    strings.Split(r.FormValue("tags"), ","),
 		}
 		if _, err := datastore.Put(ctx, key, &l); err != nil {
 			log.Errorf(ctx, "datastore.Put: %v", err)
@@ -60,18 +62,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		// Remove the record.
-		q := datastore.NewQuery("Log").KeysOnly()
-		keys, err := q.GetAll(ctx, nil)
-		if err != nil {
-			log.Errorf(ctx, "datastore.GetAll: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		for {
+			q := datastore.NewQuery("Log").KeysOnly().Limit(500)
+			keys, err := q.GetAll(ctx, nil)
+			if err != nil {
+				log.Errorf(ctx, "datastore.GetAll: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			if len(keys) == 0 {
+				return
+			}
 
-		if err := datastore.DeleteMulti(ctx, keys); err != nil {
-			log.Errorf(ctx, "datastore.DeleteMulti: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			if err := datastore.DeleteMulti(ctx, keys); err != nil {
+				log.Errorf(ctx, "datastore.DeleteMulti: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	default:
 		// Give an error message.
@@ -83,4 +90,5 @@ func handle(w http.ResponseWriter, r *http.Request) {
 type Log struct {
 	Message string
 	Date    time.Time
+	Tags    []string
 }

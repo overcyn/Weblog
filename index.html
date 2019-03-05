@@ -2,11 +2,18 @@
 <html>
 <head>
   <title>Weblog</title>
+  <script>
+  function clearLog() {
+    var req = new XMLHttpRequest();
+    req.open("DELETE", "https://overcyn.appspot.com");
+    req.send();
+  }
+</script>
 </head>
 <body>
 
 <h1>Weblog</h1>
-
+<button onclick="clearLog()">Clear</button>
 <table style="width:100%">
   <tr>
     <th align="left" width="200px">Date</th>
@@ -25,6 +32,5 @@
   </tr>
   {{end}}
 </table>
-
 </body>
 </html>
