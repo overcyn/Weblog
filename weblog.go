@@ -5,9 +5,6 @@
 package main
 
 import (
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 	"html/template"
 	"net/http"
 	"strings"
@@ -16,6 +13,7 @@ import (
 
 var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
+	logs          = []Log{}
 )
 
 type indexParams struct {
@@ -24,30 +22,18 @@ type indexParams struct {
 
 func main() {
 	http.HandleFunc("/", handle)
-	appengine.Main()
+	_ = http.ListenAndServe(":8080", nil)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
 	switch r.Method {
 	case http.MethodGet:
 		// Serve the resource.
-		var logs []Log
-		q := datastore.NewQuery("Log").Order("-Date").Limit(10000)
-		if _, err := q.GetAll(ctx, &logs); err != nil {
-			log.Errorf(ctx, "datastore.GetAll: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		indexTemplate.Execute(w, indexParams{Logs: logs})
 	case http.MethodPost:
 		// Create a new record.
-		key := datastore.NewIncompleteKey(ctx, "Log", nil)
 		t, err := time.Parse(time.RFC3339, r.FormValue("date"))
 		if err != nil {
-			log.Errorf(ctx, "time.Parse: %v", err)
 			t = time.Now()
 		}
 
@@ -56,35 +42,13 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			Date:    t,
 			Tags:    strings.Split(r.FormValue("tags"), ","),
 		}
-		if _, err := datastore.Put(ctx, key, &l); err != nil {
-			log.Errorf(ctx, "datastore.Put: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		logs = append(logs, l)
 	case http.MethodDelete:
-		// Remove the record.
-		for {
-			q := datastore.NewQuery("Log").KeysOnly().Limit(500)
-			keys, err := q.GetAll(ctx, nil)
-			if err != nil {
-				log.Errorf(ctx, "datastore.GetAll: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			if len(keys) == 0 {
-				return
-			}
-
-			if err := datastore.DeleteMulti(ctx, keys); err != nil {
-				log.Errorf(ctx, "datastore.DeleteMulti: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
+		logs = []Log{}
 	default:
 		// Give an error message.
 		http.Error(w, "Invalid request method.", 405)
 	}
-
 }
 
 type Log struct {
