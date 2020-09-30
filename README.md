@@ -27,7 +27,7 @@ fileprivate let dispatchQueue = DispatchQueue(label: "KDLog")
 
 public func KDLog(_ message: String) {
     let dateString = ISO8601DateFormatter.string(from: Date(), timeZone: TimeZone(abbreviation: "GMT")!, formatOptions: [.withInternetDateTime, .withFractionalSeconds])
-    var body = "date=\(dateString)&message=\(message)"
+    let body = "date=\(dateString)&message=\(message)"
     print(body)
     
     dispatchQueue.async {
@@ -47,7 +47,7 @@ func KDSyncLog() {
                     semaphore.signal()
                 }
             }
-            _ = semaphore.wait()
+            semaphore.wait()
         }
     }
 }
