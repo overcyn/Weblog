@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -26,6 +27,7 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("SentRequest")
 	switch r.Method {
 	case http.MethodGet:
 		// Serve the resource.

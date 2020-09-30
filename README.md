@@ -1,5 +1,9 @@
 # Weblog
 
+> env GOOS=linux GOARCH=amd64 go build .
+> scp -i ~/.ssh/google_compute_engine Weblog overcyn@34.121.46.78:/home/overcyn
+> ssh -i ~/.ssh/google_compute_engine overcyn@34.121.46.78
+
 Write a log to database
 
 `POST https://overcyn.appspot.com?message=Body&date=2006-01-02T15:04:05-07:00`
@@ -22,11 +26,8 @@ gcloud app deploy
 fileprivate let dispatchQueue = DispatchQueue(label: "KDLog")
 
 public func KDLog(_ message: String) {
-    var body: String = "message=\(message)"
-    if #available(iOS 11.0, watchOS 4.0, *) {
-        let dateString = ISO8601DateFormatter.string(from: Date(), timeZone: TimeZone(abbreviation: "GMT")!, formatOptions: [.withInternetDateTime, .withFractionalSeconds])
-        body = "date=\(dateString)&message=\(message)"
-    }
+    let dateString = ISO8601DateFormatter.string(from: Date(), timeZone: TimeZone(abbreviation: "GMT")!, formatOptions: [.withInternetDateTime, .withFractionalSeconds])
+    var body = "date=\(dateString)&message=\(message)"
     print(body)
     
     dispatchQueue.async {
@@ -53,7 +54,7 @@ func KDSyncLog() {
 
 func KDSyncLogIter(_ completion: @escaping () -> ()) {
     if let message = KDPop() {
-        var request: URLRequest = URLRequest(url: URL(string: "https://overcyn.appspot.com")!)
+        var request: URLRequest = URLRequest(url: URL(string: "http://34.121.46.78")!)
         request.httpMethod = "POST"
         request.httpBody = message.data(using: .utf8)
         URLSession.shared.dataTask(with: request) {_, _, err in
