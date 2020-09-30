@@ -2,6 +2,7 @@
 
 > env GOOS=linux GOARCH=amd64 go build .
 > scp -i ~/.ssh/google_compute_engine Weblog overcyn@34.121.46.78:/home/overcyn
+> scp -i ~/.ssh/google_compute_engine index.html overcyn@34.121.46.78:/home/overcyn
 > ssh -i ~/.ssh/google_compute_engine overcyn@34.121.46.78
 
 Write a log to database
