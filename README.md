@@ -1,16 +1,18 @@
 # Weblog
 
 > env GOOS=linux GOARCH=amd64 go build .
-> scp -i ~/.ssh/google_compute_engine Weblog overcyn@34.121.46.78:/home/overcyn
-> ssh -i ~/.ssh/google_compute_engine overcyn@34.121.46.78
+> cd ..
+> scp -r Weblog overcyn@173.255.221.39:/home/overcyn
+> ssh overcyn@173.255.221.39
+> Weblog ^
 
 Write a log to database
 
-`POST https://overcyn.appspot.com?message=Body&date=2006-01-02T15:04:05-07:00`
+`POST http://173.255.221.39:8002?message=Body&date=2006-01-02T15:04:05-07:00`
 
 Clear all logs
 
-`DELETE https://overcyn.appspot.com`
+`DELETE http://173.255.221.39:8002`
 
 ### Run dev server
 dev_appserver.py app.yaml
@@ -54,7 +56,7 @@ func KDSyncLog() {
 
 func KDSyncLogIter(_ completion: @escaping () -> ()) {
     if let message = KDPop() {
-        var request: URLRequest = URLRequest(url: URL(string: "http://34.121.46.78")!)
+        var request: URLRequest = URLRequest(url: URL(string: "http://173.255.221.39:8002")!)
         request.httpMethod = "POST"
         request.httpBody = message.data(using: .utf8)
         URLSession.shared.dataTask(with: request) {_, _, err in

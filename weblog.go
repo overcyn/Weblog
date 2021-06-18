@@ -23,7 +23,7 @@ type indexParams struct {
 
 func main() {
 	http.HandleFunc("/", handle)
-	_ = http.ListenAndServe(":8080", nil)
+	_ = http.ListenAndServe(":8002", nil)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
