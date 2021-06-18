@@ -26,9 +26,7 @@ gcloud app deploy
 ```
 // Debug code... don't commit
 
-fileprivate let dispatchQueue = DispatchQueue(label: "KDLog")
-
-public func KDLog(_ message: String) {
+func KDLog(_ message: String) {
     let dateString = ISO8601DateFormatter.string(from: Date(), timeZone: TimeZone(abbreviation: "GMT")!, formatOptions: [.withInternetDateTime, .withFractionalSeconds])
     let body = "date=\(dateString)&message=\(message)"
     print(body)
@@ -39,7 +37,9 @@ public func KDLog(_ message: String) {
     }
 }
 
-func KDSyncLog() {
+fileprivate let dispatchQueue = DispatchQueue(label: "KDLog")
+
+fileprivate func KDSyncLog() {
     let semaphore = DispatchSemaphore(value: 0)
     ProcessInfo.processInfo.performExpiringActivity(withReason: "KDSyncLog") { expiring in
         if expiring {
@@ -55,7 +55,7 @@ func KDSyncLog() {
     }
 }
 
-func KDSyncLogIter(_ completion: @escaping () -> ()) {
+fileprivate func KDSyncLogIter(_ completion: @escaping () -> ()) {
     if let message = KDPop() {
         var request: URLRequest = URLRequest(url: URL(string: "http://173.255.221.39:8002")!)
         request.httpMethod = "POST"
@@ -74,17 +74,18 @@ func KDSyncLogIter(_ completion: @escaping () -> ()) {
     }
 }
 
-func KDPop() -> String? {
+fileprivate func KDPop() -> String? {
     var messages = UserDefaults.standard.stringArray(forKey: "KDLog") ?? []
     let message = messages.popLast()
     UserDefaults.standard.set(messages, forKey: "KDLog")
     return message
 }
 
-func KDPush(_ message: String) {
+fileprivate func KDPush(_ message: String) {
     var messages = UserDefaults.standard.stringArray(forKey: "KDLog") ?? []
     messages.append(message)
     UserDefaults.standard.set(messages, forKey: "KDLog")
 }
+
 // Debug code... Don't commit
 ```
