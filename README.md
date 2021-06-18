@@ -4,7 +4,8 @@
 > cd ..
 > scp -r Weblog overcyn@173.255.221.39:/home/overcyn
 > ssh overcyn@173.255.221.39
-> Weblog ^
+> cd Weblog
+> ./Weblog &
 
 Write a log to database
 
